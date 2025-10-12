@@ -1,0 +1,6 @@
+[
+  { "key": 1, "name": "Song One", "file": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" },
+  { "key": 2, "name": "Song Two", "file": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3" },
+  { "key": 3, "name": "Song Three", "file": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3" }
+]
+

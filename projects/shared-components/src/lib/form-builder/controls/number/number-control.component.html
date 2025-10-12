@@ -1,0 +1,12 @@
+<ng-container *ngIf="viewModel">
+  <mat-form-field appearance="fill">
+    <input
+      matInput
+      type="number"
+      [placeholder]="viewModel.name"
+      [formControl]="viewModel.formControl"
+      [min]="viewModel.min || 1"
+      [max]="viewModel.max || 9"
+    />
+  </mat-form-field>
+</ng-container>

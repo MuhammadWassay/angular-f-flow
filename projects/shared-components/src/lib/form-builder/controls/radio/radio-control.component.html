@@ -1,0 +1,13 @@
+<div *ngIf="viewModel">
+  <label>{{ viewModel.name }}</label>
+  <mat-radio-group [formControl]="control">
+    <mat-radio-button *ngFor="let opt of viewModel.options" [value]="opt.value">
+      {{ opt.label }}
+    </mat-radio-button>
+  </mat-radio-group>
+
+
+  <div *ngIf="control.value">
+    <small>Selected: {{ control.value }}</small>
+  </div>
+</div>

@@ -1,0 +1,7 @@
+<mat-form-field class="w-full">
+  <mat-select [placeholder]="viewModel.name" [formControl]="viewModel.formControl">
+    <mat-option *ngFor="let option of options" [value]="option.value">
+      {{ option.label }}
+    </mat-option>
+  </mat-select>
+</mat-form-field>

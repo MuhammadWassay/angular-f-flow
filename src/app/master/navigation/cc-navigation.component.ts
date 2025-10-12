@@ -1,0 +1,35 @@
+import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { RouterLink, RouterLinkActive } from '@angular/router';
+import { MatIcon } from '@angular/material/icon';
+
+interface INavigationItem {
+  key: string;
+  name: string;
+  icon: string;
+  disabled: boolean;
+}
+
+@Component({
+  selector: 'nav[cc-navigation]',
+  templateUrl: './cc-navigation.component.html',
+  styleUrls: [ './cc-navigation.component.scss' ],
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    MatIcon,
+    RouterLink,
+    RouterLinkActive
+  ]
+})
+export class CcNavigationComponent {
+
+  public menu: INavigationItem[] = [
+     {
+      key: 'flow',
+      name: 'Flow',
+      icon: 'timeline',
+      disabled: false,
+    }
+  ];
+
+}

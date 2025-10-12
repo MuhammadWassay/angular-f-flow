@@ -1,0 +1,31 @@
+export enum EFormBuilderControlType {
+
+  INPUT = "INPUT",
+
+  OUTPUTS_SELECT = "OUTPUTS_SELECT",
+
+  TEXTAREA = "TEXTAREA",
+
+  TEXTBOX = 'TEXTBOX',
+
+  SELECT = 'SELECT',
+
+  SELECT_DIGIT = 'SELECT_DIGIT',
+
+  OUTPUTS_EDITABLE = 'OUTPUTS_EDITABLE',
+
+  RADIO = 'RADIO',
+  
+  NUMBER = 'NUMBER',
+
+  REPEATER = 'REPEATER',   // 👈 add this
+
+  CONDITION_SELECT = 'CONDITION_SELECT', // ← custom for If/Else
+
+  DROPDOWN = 'DROPDOWN',
+
+  CONDITION = 'condition'
+
+// SELECT_OPERATOR = 'SELECT_OPERATOR',
+
+}

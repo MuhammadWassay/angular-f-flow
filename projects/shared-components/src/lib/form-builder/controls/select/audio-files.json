@@ -1,0 +1,5 @@
+[
+  { "key": 1, "name": "Song One", "file": "assets/audio/song1.mp3" },
+  { "key": 2, "name": "Song Two", "file": "assets/audio/song2.mp3" },
+  { "key": 3, "name": "Song Three", "file": "assets/audio/song3.mp3" }
+]

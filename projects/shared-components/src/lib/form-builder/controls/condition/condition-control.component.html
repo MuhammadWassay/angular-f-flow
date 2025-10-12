@@ -1,0 +1,21 @@
+<div *ngFor="let cond of viewModel.formControl.value; let i = index" class="flex gap-2 items-center">
+
+  <!-- Left Value -->
+  <mat-form-field>
+    <input matInput placeholder="Left Value" [formControl]="cond.leftValue">
+  </mat-form-field>
+
+  <!-- Operator Dropdown -->
+  <mat-form-field>
+    <mat-select placeholder="Operator" [formControl]="cond.operator">
+      <mat-option *ngFor="let opt of cond.operatorOptions" [value]="opt.value">
+        {{ opt.label }}
+      </mat-option>
+    </mat-select>
+  </mat-form-field>
+
+  <!-- Right Value -->
+  <mat-form-field>
+    <input matInput placeholder="Right Value" [formControl]="cond.rightValue">
+  </mat-form-field>
+</div>

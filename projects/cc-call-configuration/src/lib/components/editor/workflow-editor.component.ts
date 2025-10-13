@@ -282,7 +282,9 @@ export class WorkflowEditorComponent implements OnInit, AfterViewInit, OnDestroy
 
     let baseUrl = window.location.origin;
     const localMatch = window.location.pathname.match(/(\/Etaps\/pulse-inventory-system\/public)/i);
-    if (localMatch) baseUrl += localMatch[1];
+    if (localMatch) {
+      baseUrl += localMatch[1];
+    }
 
     const url = `${baseUrl}/broadcast-campaign/builder_json/${builderId}`;
 
@@ -304,11 +306,7 @@ export class WorkflowEditorComponent implements OnInit, AfterViewInit, OnDestroy
           console.error("Invalid JSON in server response:", e);
         }
 
-        // if flow is already loaded, don't reset or wipe it
-        if (this.viewModel && this.viewModel.nodes?.length) {
-          console.log("Flow already loaded, skipping reload.");
-          return;
-        }
+        const shouldReset = !this.viewModel;
 
         this.viewModel = json || {
           key: builderId,
@@ -316,20 +314,24 @@ export class WorkflowEditorComponent implements OnInit, AfterViewInit, OnDestroy
           connections: []
         };
 
+        if (shouldReset) {
+          this.fFlowComponent?.reset?.();
+        }
+
         this.changeDetectorRef.detectChanges();
-        console.log("Flow initialized:", this.viewModel);
+        console.log("Flow loaded successfully:", this.viewModel);
       })
       .catch(err => {
         console.error("Failed to load flow:", err);
 
-        if (!this.viewModel) {
-          this.viewModel = {
-            key: builderId || crypto.randomUUID(),
-            nodes: [],
-            connections: []
-          };
-          this.changeDetectorRef.detectChanges();
-        }
+        this.viewModel = {
+          key: builderId || crypto.randomUUID(),
+          nodes: [],
+          connections: []
+        };
+
+        this.fFlowComponent?.reset?.();
+        this.changeDetectorRef.detectChanges();
       });
   }
 

@@ -8,7 +8,7 @@ export const NODE_STATIC_MAP: IMap<INodeStaticMapItem> = {
     icon: 'add_call',
     color: '#39b372',
     isExpandable: false,
-    node_name: 'incoming_call',
+    node_name: 'start',
   },
   [ENodeType.UserInput]: {
     name: 'IVR',

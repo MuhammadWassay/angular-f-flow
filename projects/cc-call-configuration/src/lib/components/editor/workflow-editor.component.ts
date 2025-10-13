@@ -95,6 +95,7 @@ export class WorkflowEditorComponent implements OnInit, AfterViewInit, OnDestroy
   ) {}
 
   ngOnInit(): void {
+    this.loadJSONFileFromServer();
     this.subscriptions$.add(this.subscribeReloadEvents());
   }
 
@@ -233,82 +234,28 @@ export class WorkflowEditorComponent implements OnInit, AfterViewInit, OnDestroy
     return this.fPlatform.getOS() === EOperationSystem.MAC_OS ? event.metaKey : event.ctrlKey;
   }
 
-  // ✅ Save JSON file
-  // public saveJSONFile(): void {
-  //   if (!this.viewModel) {
-  //     alert("No flow data found!");
-  //     return;
-  //   }
-
-  //   const fileName = prompt("Enter file name:", "workflow.json");
-  //   if (!fileName) {
-  //     alert("File name is required!");
-  //     return;
-  //   }
-
-  //   const data = JSON.stringify(this.viewModel, null, 2);
-  //   const blob = new Blob([data], { type: "application/json" });
-  //   const link = document.createElement("a");
-  //   link.href = URL.createObjectURL(blob);
-  //   link.download = fileName.endsWith(".json") ? fileName : `${fileName}.json`;
-  //   link.click();
-  // }
-
-  // // ✅ Load JSON file
-  // public loadJSONFile(event: Event): void {
-  //   const input = event.target as HTMLInputElement;
-  //   if (!input.files?.length) return;
-
-  //   const file = input.files[0];
-  //   const reader = new FileReader();
-  //   reader.onload = () => {
-  //     try {
-  //       const json = JSON.parse(reader.result as string);
-  //       this.viewModel = json;
-  //       this.changeDetectorRef.detectChanges();
-  //       this.fFlowComponent?.reset();
-  //       alert("Flow loaded successfully!");
-  //     } catch (e) {
-  //       alert("Invalid JSON file!");
-  //     }
-  //   };
-  //   reader.readAsText(file);
-  // }
-
-  public saveJSONFile(): void {
+  public saveFlowToServer(): void {
     if (!this.viewModel) {
       alert("No flow data found!");
       return;
     }
-
-    // ✅ Extract builder ID from URL (example: /broadcast-campaign/builder/1/flow/xxxx)
     const matchResult = window.location.pathname.match(/builder\/(\d+)\/flow\/([a-zA-Z0-9-]+)/);
     const builderId = matchResult ? matchResult[1] : null;
-
     if (!builderId) {
-      alert("❌ No builder ID found in URL!");
+      alert(" No builder ID found in URL!");
       return;
     }
-
-    // ✅ Dynamically detect correct base URL (works for local and live)
     const fullPath = window.location.href;
     let baseMatch = fullPath.match(/^(https?:\/\/[^/]+(?:\/[^/]+)*?)\/broadcast-campaign/i);
     let baseUrl = baseMatch ? baseMatch[1] : window.location.origin;
-
-    // ✅ Prevent duplication like /Etaps/pulse-inventory-system/public/Etaps/pulse-inventory-system/public
     baseUrl = baseUrl.replace(/(\/Etaps\/pulse-inventory-system\/public){2,}/i, '/Etaps/pulse-inventory-system/public');
-
-    // ✅ Build final URL safely
     const url = `${baseUrl}/broadcast-campaign/builder/flow/${builderId}`;
-
-    // ✅ Send JSON to Laravel using POST
     fetch(url, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         "X-Requested-With": "XMLHttpRequest",
-        "X-CSRF-TOKEN":
-          (document.querySelector('meta[name="csrf-token"]') as HTMLMetaElement)?.content || "",
+        "X-CSRF-TOKEN": (document.querySelector('meta[name="csrf-token"]') as HTMLMetaElement)?.content || "",
       },
       body: JSON.stringify({
         id: builderId,
@@ -317,45 +264,72 @@ export class WorkflowEditorComponent implements OnInit, AfterViewInit, OnDestroy
     })
       .then((response) => {
         if (!response.ok) throw new Error("Failed to save flow");
-        alert("✅ Flow saved successfully!");
+        alert(" Flow saved successfully!");
       })
       .catch((err) => {
         console.error(err);
-        alert("❌ Error saving flow.");
+        alert(" Error saving flow.");
       });
   }
 
-
-
-
   public loadJSONFileFromServer(): void {
-    const baseUrl = window.location.origin;
-    const id = (document.querySelector('app-root') as HTMLElement)?.getAttribute('data-builder-id');
-
-    if (!id) {
-      alert("No builder ID found!");
+    const match = window.location.pathname.match(/builder\/(\d+)/);
+    const builderId = match ? match[1] : null;
+    if (!builderId) {
+      console.warn("Not on a builder page — skipping flow load.");
       return;
     }
 
-    const url = `${baseUrl}/broadcast-campaign/builder/flow/${id}`;
+    let baseUrl = window.location.origin;
+    const localMatch = window.location.pathname.match(/(\/Etaps\/pulse-inventory-system\/public)/i);
+    if (localMatch) baseUrl += localMatch[1];
+
+    const url = `${baseUrl}/broadcast-campaign/builder_json/${builderId}`;
 
     fetch(url, {
-      method: 'GET',
+      method: "GET",
       headers: {
-        'Accept': 'application/json',
-        'X-Requested-With': 'XMLHttpRequest'
+        "Accept": "application/json",
+        "X-Requested-With": "XMLHttpRequest"
       }
     })
-      .then(response => response.json())
+      .then(response => response.ok ? response.json() : Promise.reject(response))
       .then(data => {
-        this.viewModel = data;
+        const jsonStr = data?.flow_json;
+        let json: any = null;
+
+        try {
+          json = jsonStr ? JSON.parse(jsonStr) : null;
+        } catch (e) {
+          console.error("Invalid JSON in server response:", e);
+        }
+
+        // if flow is already loaded, don't reset or wipe it
+        if (this.viewModel && this.viewModel.nodes?.length) {
+          console.log("Flow already loaded, skipping reload.");
+          return;
+        }
+
+        this.viewModel = json || {
+          key: builderId,
+          nodes: [],
+          connections: []
+        };
+
         this.changeDetectorRef.detectChanges();
-        this.fFlowComponent?.reset();
-        alert('✅ Flow loaded successfully from server!');
+        console.log("Flow initialized:", this.viewModel);
       })
       .catch(err => {
-        console.error(err);
-        alert('❌ Failed to load flow.');
+        console.error("Failed to load flow:", err);
+
+        if (!this.viewModel) {
+          this.viewModel = {
+            key: builderId || crypto.randomUUID(),
+            nodes: [],
+            connections: []
+          };
+          this.changeDetectorRef.detectChanges();
+        }
       });
   }
 

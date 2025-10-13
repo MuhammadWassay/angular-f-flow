@@ -29,16 +29,23 @@ export class CreateNodeHandler implements IHandler<CreateNodeRequest, IFlowModel
   }
 
   public handle(request: CreateNodeRequest): IFlowModel[] {
-
-    const flow = request.flows.find(x => x.key === request.flowKey);
+    console.log('Request received:', request);
+    const flowKeyFromUrl = window.location.pathname.match(/flow\/([a-zA-Z0-9-]+)/)?.[1];
+    console.log('Flow key from URL:', flowKeyFromUrl);
+    const effectiveFlowKey = request.flowKey || flowKeyFromUrl;
+    console.log('Effective flow key being used:', effectiveFlowKey);
+    const flow = request.flows.find(x => x.key === effectiveFlowKey)
+    || request.flows[0];
+    console.log('Flow found:', flow);
     if (!flow) {
-      throw new Error('Flow not found');
+      console.error('Flow not found. Request flows:', request.flows);
+      throw new Error('Flow not found 5');
     }
-
     const node = this.getNodeModel(request);
-
+    console.log('Node created:', node);
     flow.nodes.push(node);
-
+    console.log('Updated flow nodes:', flow.nodes);
+    console.log('--- CreateNodeHandler.handle finished ---');
     return request.flows;
   }
 

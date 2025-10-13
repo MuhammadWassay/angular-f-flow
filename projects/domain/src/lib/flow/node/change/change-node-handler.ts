@@ -7,17 +7,17 @@ import { generateGuid } from '@foblex/utils';
 
 @Injectable({
   providedIn: 'root'
-})                               
+})
 export class ChangeNodeHandler implements IHandler<ChangeNodeRequest, IFlowModel[]> {
 
   public handle(request: ChangeNodeRequest): IFlowModel[] {
     const flow = request.flows.find(x => x.key === request.flowKey);
-    if (!flow) throw new Error('Flow not found');
+    if (!flow) throw new Error('Flow not found 3');
 
     const node = flow.nodes.find(x => x.key === request.nodeKey);
     if (!node) throw new Error('Node not found');
 
-    node.position = request.position; 
+    node.position = request.position;
     node.value = request.value;
 
     // find outputs group

@@ -12,7 +12,7 @@ export class BulkRemoveItemsHandler implements IHandler<BulkRemoveItemsRequest, 
 
     const flow = request.flows.find(x => x.key === request.flowKey);
     if (!flow) {
-      throw new Error('Flow not found');
+      throw new Error('Flow not found 1');
     }
 
     request.outputKeys.forEach((x) => {

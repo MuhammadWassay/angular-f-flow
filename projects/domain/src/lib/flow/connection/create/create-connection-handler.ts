@@ -12,7 +12,7 @@ export class CreateConnectionHandler implements IHandler<CreateConnectionRequest
 
     const flow = request.flows.find(x => x.key === request.flowKey);
     if (!flow) {
-      throw new Error('Flow not found');
+      throw new Error('Flow not found 2');
     }
 
     const outputNode = flow.nodes.find(x => x.key === request.outputNodeKey);

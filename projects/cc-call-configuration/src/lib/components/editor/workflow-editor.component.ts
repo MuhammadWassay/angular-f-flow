@@ -298,26 +298,22 @@ export class WorkflowEditorComponent implements OnInit, AfterViewInit, OnDestroy
       .then(response => response.ok ? response.json() : Promise.reject(response))
       .then(data => {
         const jsonStr = data?.flow_json;
-        let json: any = null;
+        let parsedFlow: IFlowViewModel | undefined;
 
         try {
-          json = jsonStr ? JSON.parse(jsonStr) : null;
+          parsedFlow = jsonStr ? JSON.parse(jsonStr) : undefined;
         } catch (e) {
-          console.error("Invalid JSON in server response:", e);
+          console.error("Invalid JSON from server:", e);
+          parsedFlow = undefined;
         }
 
-        const shouldReset = !this.viewModel;
-
-        this.viewModel = json || {
-          key: builderId,
+        this.viewModel = parsedFlow || {
+          key: builderId || crypto.randomUUID(),
           nodes: [],
           connections: []
         };
 
-        if (shouldReset) {
-          this.fFlowComponent?.reset?.();
-        }
-
+        this.fFlowComponent?.reset?.();
         this.changeDetectorRef.detectChanges();
         console.log("Flow loaded successfully:", this.viewModel);
       })

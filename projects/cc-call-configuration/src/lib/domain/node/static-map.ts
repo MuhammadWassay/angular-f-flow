@@ -52,6 +52,13 @@ export const NODE_STATIC_MAP: IMap<INodeStaticMapItem> = {
     isExpandable: true,
     node_name: 'if_else',
   },
+  [ENodeType.DBStore]: {
+    name: 'DB Store',
+    icon: 'storage',
+    color: '#4db6ac',
+    isExpandable: true,
+    node_name: 'db_store',
+  },
 };
 
 interface IMap<T = string> {

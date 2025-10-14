@@ -8,5 +8,5 @@ export interface INodeStaticMapItem {
 
   isExpandable: boolean;
 
-  node_name: string;
+  node_name?: string;
 }

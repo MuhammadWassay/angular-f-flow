@@ -16,6 +16,8 @@ import { CreatePlayFileNodeHandler } from '../create-play-file-node/create-play-
 import { CreatePlayFileNodeRequest } from '../create-play-file-node/create-play-file-node-request';
 import { CreateIfElseNodeHandler } from '../create-if-else-node/create-if-else-node-handler';
 import { CreateIfElseNodeRequest } from '../create-if-else-node/create-if-else-node-request';
+import { CreateDBStoreNodeHandler } from '../create-db-store-node/create-db-store-node-handler';
+import { CreateDBStoreNodeRequest } from '../create-db-store-node/create-db-store-node-request';
 
 
 @Injectable({
@@ -79,6 +81,9 @@ export class CreateNodeHandler implements IHandler<CreateNodeRequest, IFlowModel
         break;
       case ENodeType.IfElse:
         result = this.injector.get(CreateIfElseNodeHandler).handle(new CreateIfElseNodeRequest(request.position));
+        break;
+      case ENodeType.DBStore:
+        result = (this.injector.get(CreateDBStoreNodeHandler) as CreateDBStoreNodeHandler).handle(new CreateDBStoreNodeRequest(request.position));
         break;
 
       default:

@@ -5,6 +5,8 @@ export enum ENodeType {
 
     IfElse = 'if-else',
 
+  DBStore = 'db-store',
+
   PlayText = 'play-text',
 
   UserInput = 'user-input',

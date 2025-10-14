@@ -297,11 +297,10 @@ export class WorkflowEditorComponent implements OnInit, AfterViewInit, OnDestroy
     })
       .then(response => response.ok ? response.json() : Promise.reject(response))
       .then(data => {
-        const jsonStr = data?.flow_json;
         let parsedFlow: IFlowViewModel | undefined;
 
         try {
-          parsedFlow = jsonStr ? JSON.parse(jsonStr) : undefined;
+          parsedFlow = data?.flow_json ? JSON.parse(data.flow_json) : undefined;
         } catch (e) {
           console.error("Invalid JSON from server:", e);
           parsedFlow = undefined;

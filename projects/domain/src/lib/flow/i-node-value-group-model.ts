@@ -4,4 +4,5 @@ import { IFormBuilderValueGroup } from '@shared-components';
 export interface INodeValueGroupModel extends IFormBuilderValueGroup {
 
   controls: INodeValueControlModel<any>[];
+  param?: string;
 }

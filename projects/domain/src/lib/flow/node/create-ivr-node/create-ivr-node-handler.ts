@@ -12,7 +12,7 @@ import { IHandler } from '@foblex/mediator';
 export class CreateIvrNodeHandler implements IHandler<CreateIvrNodeRequest, INodeModel> {
 
   public handle(request: CreateIvrNodeRequest): INodeModel {
-    
+
     return {
       key: generateGuid(),
       description: 'Input Caller Lookup',
@@ -27,6 +27,7 @@ export class CreateIvrNodeHandler implements IHandler<CreateIvrNodeRequest, INod
       value: {
         groups: [
           {
+            param: 'num_outputs',
             name: 'Select Number of Outputs',
             controls: [
               {
@@ -38,6 +39,7 @@ export class CreateIvrNodeHandler implements IHandler<CreateIvrNodeRequest, INod
             ]
           },
           {
+            param: 'file_name',
             name: 'Select File',
             controls: [
               {
@@ -54,6 +56,7 @@ export class CreateIvrNodeHandler implements IHandler<CreateIvrNodeRequest, INod
             ]
           },
           {
+            param: 'max_digits',
             name: 'Choose Digit',
             controls: [
               {
@@ -81,13 +84,14 @@ export class CreateIvrNodeHandler implements IHandler<CreateIvrNodeRequest, INod
             ]
           },
           {
+            param: 'time_out',
             name: 'Maximum Wait Time',
             controls: [
               {
                 key: 'maxWaitTime',
                 name: 'Time (seconds) for user input',
                 type: EFormBuilderControlType.INPUT,
-                value: 10 
+                value: 10
               }
             ]
           },

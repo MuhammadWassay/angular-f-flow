@@ -19,6 +19,9 @@ import { FormsModule } from '@angular/forms';
 import { WorkflowNodeComponent } from './node/workflow-node.component';
 import { WorkflowActionPanelComponent } from './action-panel/workflow-action-panel.component';
 import { WorkflowPaletteComponent } from './palette/workflow-palette.component';
+import { EFormBuilderControlType } from '@shared-components';
+import {ENodeType} from '@domain';
+
 import { distinctUntilChanged, filter, map, merge, Observable, startWith, Subject, Subscription, take } from 'rxjs';
 import {
   BulkRemoveHandler, BulkRemoveRequest, ChangeNodeHandler, ChangeNodeRequest,
@@ -234,6 +237,210 @@ export class WorkflowEditorComponent implements OnInit, AfterViewInit, OnDestroy
     return this.fPlatform.getOS() === EOperationSystem.MAC_OS ? event.metaKey : event.ctrlKey;
   }
 
+  public loadJSONFileFromServer(): void {
+    const match = window.location.pathname.match(/builder\/(\d+)/);
+    const builderId = match ? match[1] : null;
+    if (!builderId) {
+      console.warn("Not on a builder page — skipping flow load.");
+      return;
+    }
+
+    let baseUrl = window.location.origin;
+    const localMatch = window.location.pathname.match(/(\/Etaps\/pulse-inventory-system\/public)/i);
+    if (localMatch) {
+      baseUrl += localMatch[1];
+    }
+
+    const url = `${baseUrl}/broadcast-campaign/builder_json/${builderId}`;
+
+    // Hardcoded dropdown options
+    const operatorOptions = [
+      { label: 'Equals (=)', value: '=' },
+    ];
+
+    const valueOptions = [
+      { label: 'User Input', value: 'user_input' },
+      { label: 'Caller Number', value: 'caller_number' },
+      { label: 'System Time', value: 'system_time' },
+      { label: 'Custom Textbox', value: 'custom_textbox' }
+    ];
+
+    const variableOptions = [
+      { label: 'User Input', value: 'user_input' },
+      { label: 'Caller Number', value: 'caller_number' },
+      { label: 'System Time', value: 'system_time' }
+    ];
+
+    fetch(url, {
+      method: "GET",
+      headers: {
+        "Accept": "application/json",
+        "X-Requested-With": "XMLHttpRequest"
+      }
+    })
+      .then(response => response.ok ? response.json() : Promise.reject(response))
+      .then(data => {
+        let parsedFlow: IFlowViewModel | undefined;
+
+        try {
+          parsedFlow = data?.flow_json ? JSON.parse(data.flow_json) : undefined;
+        } catch (e) {
+          console.error("Invalid JSON from server:", e);
+          parsedFlow = undefined;
+        }
+
+        // Normalize existing nodes if any
+        if (parsedFlow?.nodes?.length) {
+          parsedFlow.nodes.forEach(node => {
+            node.value?.groups?.forEach(group => {
+              if (!group.name) group.name = 'Default Group';
+
+              group.controls?.forEach(control => {
+                const defaultOptions = control.key === 'operator' ? operatorOptions
+                                    : control.key === 'value' ? valueOptions
+                                    : control.key === 'variable' ? variableOptions
+                                    : [];
+
+                // Assign default options if none exist
+                if (!control.options?.length) {
+                  control.options = defaultOptions;
+                  control.value = control.value ?? defaultOptions[0]?.value;
+                }
+
+                // Normalize options
+                control.options = control.options.map(opt => ({
+                  label: opt.label ?? opt.value,
+                  value: opt.value ?? opt.label
+                }));
+              });
+            });
+          });
+        }
+
+        // Fallback node if flow is empty
+        const fallbackNode: INodeViewModel<string> = {
+          key: crypto.randomUUID(),
+          name: 'Operator & Value Node',
+          node_name: 'operator_value_node',
+          type: ENodeType.SetVariable,
+          color: '#ff9800',
+          icon: 'tune',
+          isExpanded: true,
+          isExpandable: true,
+          input: 'dummy_input',
+          outputs: [],
+          position: { x: 0, y: 0 },
+          value: {
+            groups: [
+              {
+                name: 'Default Group',
+                controls: [
+                  {
+                    key: 'variable',
+                    name: 'Variable',
+                    type: EFormBuilderControlType.SELECT,
+                    value: variableOptions[0].value,
+                    options: variableOptions
+                  },
+                  {
+                    key: 'operator',
+                    name: 'Operator',
+                    type: EFormBuilderControlType.SELECT,
+                    value: operatorOptions[0].value,
+                    options: operatorOptions
+                  },
+                  {
+                    key: 'value',
+                    name: 'Value',
+                    type: EFormBuilderControlType.SELECT,
+                    value: valueOptions[0].value,
+                    options: valueOptions
+                  }
+                ]
+              }
+            ]
+          }
+        };
+
+        // Assign viewModel
+        if (parsedFlow) {
+          if (!parsedFlow.nodes.some(n => n.node_name === 'operator_value_node')) {
+            parsedFlow.nodes.push(fallbackNode);
+          }
+          this.viewModel = parsedFlow;
+        } else {
+          this.viewModel = {
+            key: builderId || crypto.randomUUID(),
+            nodes: [fallbackNode],
+            connections: []
+          };
+        }
+
+        this.fFlowComponent?.reset?.();
+        this.changeDetectorRef.detectChanges();
+        console.log("Flow loaded successfully:", this.viewModel);
+      })
+      .catch(err => {
+        console.error("Failed to load flow:", err);
+
+        const fallbackNode: INodeViewModel<string> = {
+          key: crypto.randomUUID(),
+          name: 'Operator & Value Node',
+          node_name: 'operator_value_node',
+          type: ENodeType.SetVariable,
+          color: '#ff9800',
+          icon: 'tune',
+          isExpanded: true,
+          isExpandable: true,
+          input: 'dummy_input',
+          outputs: [],
+          position: { x: 0, y: 0 },
+          value: {
+            groups: [
+              {
+                name: 'Default Group',
+                controls: [
+                  {
+                    key: 'variable',
+                    name: 'Variable',
+                    type: EFormBuilderControlType.SELECT,
+                    value: variableOptions[0].value,
+                    options: variableOptions
+                  },
+                  {
+                    key: 'operator',
+                    name: 'Operator',
+                    type: EFormBuilderControlType.SELECT,
+                    value: operatorOptions[0].value,
+                    options: operatorOptions
+                  },
+                  {
+                    key: 'value',
+                    name: 'Value',
+                    type: EFormBuilderControlType.SELECT,
+                    value: valueOptions[0].value,
+                    options: valueOptions
+                  }
+                ]
+              }
+            ]
+          }
+        };
+
+        this.viewModel = {
+          key: builderId || crypto.randomUUID(),
+          nodes: [fallbackNode],
+          connections: []
+        };
+
+        this.fFlowComponent?.reset?.();
+        this.changeDetectorRef.detectChanges();
+      });
+  }
+
+
+
+
   public saveFlowToServer(): void {
     if (!this.viewModel) {
       alert("No flow data found!");
@@ -271,65 +478,6 @@ export class WorkflowEditorComponent implements OnInit, AfterViewInit, OnDestroy
         alert(" Error saving flow.");
       });
   }
-
-  public loadJSONFileFromServer(): void {
-    const match = window.location.pathname.match(/builder\/(\d+)/);
-    const builderId = match ? match[1] : null;
-    if (!builderId) {
-      console.warn("Not on a builder page — skipping flow load.");
-      return;
-    }
-
-    let baseUrl = window.location.origin;
-    const localMatch = window.location.pathname.match(/(\/Etaps\/pulse-inventory-system\/public)/i);
-    if (localMatch) {
-      baseUrl += localMatch[1];
-    }
-
-    const url = `${baseUrl}/broadcast-campaign/builder_json/${builderId}`;
-
-    fetch(url, {
-      method: "GET",
-      headers: {
-        "Accept": "application/json",
-        "X-Requested-With": "XMLHttpRequest"
-      }
-    })
-      .then(response => response.ok ? response.json() : Promise.reject(response))
-      .then(data => {
-        let parsedFlow: IFlowViewModel | undefined;
-
-        try {
-          parsedFlow = data?.flow_json ? JSON.parse(data.flow_json) : undefined;
-        } catch (e) {
-          console.error("Invalid JSON from server:", e);
-          parsedFlow = undefined;
-        }
-
-        this.viewModel = parsedFlow || {
-          key: builderId || crypto.randomUUID(),
-          nodes: [],
-          connections: []
-        };
-
-        this.fFlowComponent?.reset?.();
-        this.changeDetectorRef.detectChanges();
-        console.log("Flow loaded successfully:", this.viewModel);
-      })
-      .catch(err => {
-        console.error("Failed to load flow:", err);
-
-        this.viewModel = {
-          key: builderId || crypto.randomUUID(),
-          nodes: [],
-          connections: []
-        };
-
-        this.fFlowComponent?.reset?.();
-        this.changeDetectorRef.detectChanges();
-      });
-  }
-
 
   ngOnDestroy(): void {
     this.subscriptions$.unsubscribe();

@@ -69,7 +69,7 @@ export class CreateSetVariableNodeHandler implements IHandler<CreateSetVariableN
                   { label: 'User Input', value: 'user_input' },
                   { label: 'Caller Number', value: 'caller_number' },
                   { label: 'System Time', value: 'system_time' },
-                  { label: 'Textbox', value: 'textbox' }
+                  { label: 'Custom Textbox', value: 'custom_textbox' }
                 ]
               },
               {

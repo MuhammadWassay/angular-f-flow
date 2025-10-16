@@ -2,7 +2,9 @@
   <mat-form-field class="w-full">
     <mat-select [placeholder]="viewModel.name" [formControl]="viewModel.formControl">
       @for (option of options; track option) {
-        <mat-option [value]="option.file">{{ option.file }}</mat-option>
+        <mat-option [value]="option.value ?? option.file ?? option.label">
+          {{ option.label ?? option.file ?? option.name }}
+        </mat-option>
       }
     </mat-select>
   </mat-form-field>

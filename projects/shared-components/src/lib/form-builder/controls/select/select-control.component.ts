@@ -28,18 +28,29 @@ export class SelectControlComponent implements OnInit {
   public viewModel!: IBuilderValueControlViewModel;
 
   protected options: {
-    key: number;
-    name: string;
-    file: string;
+    key?: number;
+    name?: string;
+    file?: string;
+    label?: string;
+    value?: string;
   }[] = [];
 
   constructor(private http: HttpClient) {}
 
   ngOnInit(): void {
-    // Load JSON dynamicallyss
-    this.http.get<{ key: number; name: string; file: string }[]>('assets/audio-files.json')
-      .subscribe((data) => {
-        this.options = data;
-      });
+    if (this.viewModel.key === 'audio_file') {
+      this.http.get<{ key: number; name: string; file: string }[]>('assets/audio-files.json')
+        .subscribe((data) => {
+          this.options = data.map(opt => ({
+            key: opt.key,
+            name: opt.name,
+            file: opt.file,
+            label: opt.name,
+            value: opt.file
+          }));
+        });
+    } else {
+      this.options = this.viewModel?.options ?? [];
+    }
   }
 }

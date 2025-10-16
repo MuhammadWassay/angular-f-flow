@@ -18,6 +18,8 @@ import { CreateIfElseNodeHandler } from '../create-if-else-node/create-if-else-n
 import { CreateIfElseNodeRequest } from '../create-if-else-node/create-if-else-node-request';
 import { CreateDBStoreNodeHandler } from '../create-db-store-node/create-db-store-node-handler';
 import { CreateDBStoreNodeRequest } from '../create-db-store-node/create-db-store-node-request';
+import { CreateSetVariableNodeHandler } from '../create-set-variable-node/create-set-variable-node-handler';
+import { CreateSetVariableNodeRequest } from '../create-set-variable-node/create-set-variable-node-request';
 
 
 @Injectable({
@@ -83,7 +85,11 @@ export class CreateNodeHandler implements IHandler<CreateNodeRequest, IFlowModel
         result = this.injector.get(CreateIfElseNodeHandler).handle(new CreateIfElseNodeRequest(request.position));
         break;
       case ENodeType.DBStore:
-        result = (this.injector.get(CreateDBStoreNodeHandler) as CreateDBStoreNodeHandler).handle(new CreateDBStoreNodeRequest(request.position));
+        result = this.injector.get(CreateDBStoreNodeHandler).handle(new CreateDBStoreNodeRequest(request.position));
+        break;
+
+        case ENodeType.SetVariable:
+        result = this.injector.get(CreateSetVariableNodeHandler).handle(new CreateSetVariableNodeRequest(request.position));
         break;
 
       default:

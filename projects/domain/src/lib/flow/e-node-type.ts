@@ -7,6 +7,8 @@ export enum ENodeType {
 
   DBStore = 'db-store',
 
+  SetVariable = 'set-variable',
+
   PlayText = 'play-text',
 
   UserInput = 'user-input',

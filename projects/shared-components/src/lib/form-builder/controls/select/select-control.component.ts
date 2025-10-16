@@ -16,7 +16,7 @@ import { IBuilderValueControlViewModel } from '../../domain/i-builder-value-cont
   imports: [
     CommonModule,
     MatFormField,
-    HttpClientModule, 
+    HttpClientModule,
     ReactiveFormsModule,
     MatOption,
     MatSelect
@@ -36,7 +36,7 @@ export class SelectControlComponent implements OnInit {
   constructor(private http: HttpClient) {}
 
   ngOnInit(): void {
-    // Load JSON dynamically
+    // Load JSON dynamicallyss
     this.http.get<{ key: number; name: string; file: string }[]>('assets/audio-files.json')
       .subscribe((data) => {
         this.options = data;

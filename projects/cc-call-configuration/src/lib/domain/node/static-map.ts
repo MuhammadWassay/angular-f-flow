@@ -15,7 +15,7 @@ export const NODE_STATIC_MAP: IMap<INodeStaticMapItem> = {
     icon: 'call_log',
     color: '#2676ff',
     isExpandable: true,
-    node_name: 'user_input',
+    node_name: 'ivr',
   },
   [ENodeType.PlayText]: {
     name: 'Play text',

@@ -252,6 +252,7 @@ export class WorkflowEditorComponent implements OnInit, AfterViewInit, OnDestroy
     }
 
     const url = `${baseUrl}/broadcast-campaign/builder_json/${builderId}`;
+    const mediaUrl = `${baseUrl}/broadcast-campaign/media_json`;
 
     // Hardcoded dropdown options
     const operatorOptions = [
@@ -289,6 +290,20 @@ export class WorkflowEditorComponent implements OnInit, AfterViewInit, OnDestroy
           parsedFlow = undefined;
         }
 
+
+        Promise.all([
+          fetch(mediaUrl, {
+            method: "GET",
+            headers: { "Accept": "application/json" }
+          }).then(res => res.ok ? res.json() : [])
+        ]).then(([mediaFiles]) => {
+
+          const mediaOptions = Array.isArray(mediaFiles)
+            ? mediaFiles.map((m: any) => ({
+                label: m.display_name,
+                value: m.display_name
+              }))
+            : [];
         // Normalize existing nodes if any
         if (parsedFlow?.nodes?.length) {
           parsedFlow.nodes.forEach(node => {
@@ -299,7 +314,8 @@ export class WorkflowEditorComponent implements OnInit, AfterViewInit, OnDestroy
                 const defaultOptions = control.key === 'operator' ? operatorOptions
                                     : control.key === 'value' ? valueOptions
                                     : control.key === 'variable' ? variableOptions
-                                    : [];
+                                    : control.key === 'file' ? mediaOptions
+                                    :[];
 
                 // Assign default options if none exist
                 if (!control.options?.length) {
@@ -379,6 +395,7 @@ export class WorkflowEditorComponent implements OnInit, AfterViewInit, OnDestroy
         this.fFlowComponent?.reset?.();
         this.changeDetectorRef.detectChanges();
         console.log("Flow loaded successfully:", this.viewModel);
+        });
       })
       .catch(err => {
         console.error("Failed to load flow:", err);
